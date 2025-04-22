@@ -1,0 +1,70 @@
+1.Encryption Script (caesar_encrypt.py) 
+
+
+
+
+def caesar_encrypt(text, key):
+    result = ""
+    for char in text:
+        if char.isalpha():
+            shift = 65 if char.isupper() else 97
+            result += chr((ord(char) - shift + key) % 26 + shift)
+        else:
+            result += char
+    return result
+
+if __name__ == "__main__":
+    text = input("Enter text to encrypt: ")
+    key = int(input("Enter key (0-25): "))
+    encrypted = caesar_encrypt(text, key)
+    print("Encrypted text:", encrypted)
+
+
+
+2. Decryption Script (caesar_decrypt.py)
+
+
+
+
+def caesar_decrypt(text, key):
+    result = ""
+    for char in text:
+        if char.isalpha():
+            shift = 65 if char.isupper() else 97
+            result += chr((ord(char) - shift - key) % 26 + shift)
+        else:
+            result += char
+    return result
+
+if __name__ == "__main__":
+    text = input("Enter text to decrypt: ")
+    key = int(input("Enter key (0-25): "))
+    decrypted = caesar_decrypt(text, key)
+    print("Decrypted text:", decrypted)
+
+
+
+
+3. Brute-Force Cryptanalysis Script (caesar_brute_force.py)
+
+
+
+
+def caesar_decrypt(text, key):
+    result = ""
+    for char in text:
+        if char.isalpha():
+            shift = 65 if char.isupper() else 97
+            result += chr((ord(char) - shift - key) % 26 + shift)
+        else:
+            result += char
+    return result
+
+def brute_force(ciphertext):
+    print("\n[Brute-Force Results]:")
+    for key in range(26):
+        print(f"Key {key:2}: {caesar_decrypt(ciphertext, key)}")
+
+if __name__ == "__main__":
+    cipher = input("Enter the encrypted message: ")
+    brute_force(cipher)
