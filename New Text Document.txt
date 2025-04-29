@@ -1,0 +1,115 @@
+Encryption Program (Monoalphabetic Cipher)
+python
+Copy
+Edit
+import string
+
+# Example substitution key
+substitution_key = {
+    'a': 'q', 'b': 'w', 'c': 'e', 'd': 'r', 'e': 't', 'f': 'y',
+    'g': 'u', 'h': 'i', 'i': 'o', 'j': 'p', 'k': 'a', 'l': 's',
+    'm': 'd', 'n': 'f', 'o': 'g', 'p': 'h', 'q': 'j', 'r': 'k',
+    's': 'l', 't': 'z', 'u': 'x', 'v': 'c', 'w': 'v', 'x': 'b',
+    'y': 'n', 'z': 'm'
+}
+
+def encrypt(plaintext, key):
+    plaintext = plaintext.lower()
+    ciphertext = ""
+    for char in plaintext:
+        if char in key:
+            ciphertext += key[char]
+        else:
+            ciphertext += char
+    return ciphertext
+
+# Example usage
+if __name__ == "__main__":
+    plaintext = "the quick brown fox jumps over the lazy dog"
+    encrypted_text = encrypt(plaintext, substitution_key)
+    print("Encrypted Text:")
+    print(encrypted_text)
+
+
+➋ Decryption Program (Monoalphabetic Cipher)
+python
+Copy
+Edit
+# Reverse key for decryption
+substitution_key = {
+    'a': 'q', 'b': 'w', 'c': 'e', 'd': 'r', 'e': 't', 'f': 'y',
+    'g': 'u', 'h': 'i', 'i': 'o', 'j': 'p', 'k': 'a', 'l': 's',
+    'm': 'd', 'n': 'f', 'o': 'g', 'p': 'h', 'q': 'j', 'r': 'k',
+    's': 'l', 't': 'z', 'u': 'x', 'v': 'c', 'w': 'v', 'x': 'b',
+    'y': 'n', 'z': 'm'
+}
+
+reverse_key = {v: k for k, v in substitution_key.items()}
+
+def decrypt(ciphertext, reverse_key):
+    decrypted_text = ""
+    for char in ciphertext:
+        if char in reverse_key:
+            decrypted_text += reverse_key[char]
+        else:
+            decrypted_text += char
+    return decrypted_text
+
+# Example usage
+if __name__ == "__main__":
+    ciphertext = "zi txyoje vkgsf gsb ydxhl gctk zi snmn gsu"
+    decrypted_text = decrypt(ciphertext, reverse_key)
+    print("Decrypted Text:")
+    print(decrypted_text)
+➌ Relative Frequency Analysis Program
+python
+Copy
+Edit
+from collections import Counter
+import string
+
+def frequency_analysis(text):
+    text = text.lower()
+    letters_only = [char for char in text if char in string.ascii_lowercase]
+    total_letters = len(letters_only)
+    counter = Counter(letters_only)
+    
+    frequencies = {char: count / total_letters for char, count in counter.items()}
+    sorted_frequencies = dict(sorted(frequencies.items(), key=lambda item: item[1], reverse=True))
+    return sorted_frequencies
+
+# Example usage
+if __name__ == "__main__":
+    ciphertext = "zi txyoje vkgsf gsb ydxhl gctk zi snmn gsu"
+    
+    frequencies = frequency_analysis(ciphertext)
+    print("Relative Frequency Analysis:")
+    for letter, freq in frequencies.items():
+        print(f"{letter}: {freq:.2%}")
+➍ Break the Substitution Cipher (Guess Decryption Program)
+python
+Copy
+Edit
+def guess_decryption(ciphertext, guess_mapping):
+    guessed_text = ""
+    for char in ciphertext:
+        if char in guess_mapping:
+            guessed_text += guess_mapping[char]
+        else:
+            guessed_text += char
+    return guessed_text
+
+# Example usage
+if __name__ == "__main__":
+    ciphertext = "zi txyoje vkgsf gsb ydxhl gctk zi snmn gsu"
+
+    # Example guessed mapping based on frequency analysis
+    guessed_mapping = {
+        'z': 't', 'i': 'h', 't': 'e', 'x': 'q', 'y': 'u', 'o': 'i', 
+        'j': 'c', 'e': 'k', 'v': 'b', 'k': 'a', 'g': 'r', 's': 'o',
+        'f': 'n', 'b': 'v', 'd': 'm', 'c': 'd', 'n': 'y', 'm': 'z'
+    }
+
+    guessed_text = guess_decryption(ciphertext, guessed_mapping)
+    print("Guessed Decryption Text:")
+    print(guessed_text)
