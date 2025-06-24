@@ -1,63 +1,72 @@
 import numpy as np
 
-# 3x3 ম্যাট্রিক্স তৈরি: Key, Message, Cipher
-key_matrix = np.zeros((3, 3), dtype=int)
-message_vector = np.zeros((3, 1), dtype=int)
-cipher_matrix = np.zeros((3, 1), dtype=int)
+# Helper: Convert a character to number (a=0, b=1, ..., z=25)
+def char_to_num(char):
+    return ord(char) - ord('a')
 
-# 🔑 Key Matrix তৈরি
-def get_key_matrix(key):
-    k = 0
-    for i in range(3):
-        for j in range(3):
-            key_matrix[i][j] = ord(key[k]) % 65  # 'A' = 0, 'B' = 1 ...
-            k += 1
+# Helper: Convert number to character
+def num_to_char(num):
+    return chr((num % 26) + ord('a'))
 
-# 🔒 Encrypt ফাংশন
-def encrypt(message_vector):
-    for i in range(3):
-        cipher_matrix[i][0] = 0
-        for x in range(3):
-            cipher_matrix[i][0] += key_matrix[i][x] * message_vector[x][0]
-        cipher_matrix[i][0] %= 26
-
-# 🔓 ডিক্রিপ্ট করার জন্য ইনভার্স ম্যাট্রিক্স বের করা
-def mod_inverse(a, m):
-    # a^-1 mod m
+# Helper: Modular inverse of a number under mod 26
+def mod_inverse(a, m=26):
     for x in range(1, m):
         if (a * x) % m == 1:
             return x
     return None
 
-def matrix_mod_inv(matrix, modulus):
+# Helper: Inverse of a 2x2 matrix mod 26
+def matrix_inverse_mod_26(matrix):
     det = int(np.round(np.linalg.det(matrix)))  # determinant
-    det = det % modulus
-    det_inv = mod_inverse(det, modulus)  # modular inverse of determinant
+    det_inv = mod_inverse(det % 26, 26)  # modular inverse of determinant
+
     if det_inv is None:
-        raise ValueError("Key matrix is not invertible under mod", modulus)
-    # Cofactor matrix
-    adjugate = np.round(det * np.linalg.inv(matrix)).astype(int) % modulus
-    return (det_inv * adjugate) % modulus
+        raise ValueError("Matrix is not invertible under mod 26")
 
-# 🔓 ডিক্রিপশন ফাংশন
-def decrypt(cipher_matrix):
-    inv_key = matrix_mod_inv(key_matrix, 26)
-    decrypted = np.dot(inv_key, cipher_matrix) % 26
-    plaintext = ''.join([chr(int(val) + 65) for val in decrypted])
-    print("Decrypted Text:", plaintext)
+    # adjugate matrix
+    adj = np.array([[matrix[1][1], -matrix[0][1]],
+                    [-matrix[1][0], matrix[0][0]]])
 
-# মূল ফাংশন
-def hill_cipher(message, key):
-    get_key_matrix(key)
-    # message_vector বানানো
-    for i in range(3):
-        message_vector[i][0] = ord(message[i]) % 65
-    encrypt(message_vector)
-    ciphertext = ''.join([chr(cipher_matrix[i][0] + 65) for i in range(3)])
-    print("Ciphertext:", ciphertext)
-    decrypt(cipher_matrix)  # ডিক্রিপশন কল
+    inv_matrix = (det_inv * adj) % 26
+    return inv_matrix.astype(int)
 
-# ✅ Example
-message = "DOG"       # 3 letter message
-key = "YHGINUKER"     # 3x3 = 9 letter key
-hill_cipher(message, key)
+# Encrypt function
+def hill_encrypt(plaintext, key_matrix):
+    plaintext = plaintext.lower().replace(" ", "")
+    if len(plaintext) % 2 != 0:
+        plaintext += 'x'  # padding if odd number of letters
+
+    ciphertext = ""
+    for i in range(0, len(plaintext), 2):
+        block = [char_to_num(plaintext[i]), char_to_num(plaintext[i+1])]
+        vector = np.array(block).reshape(2, 1)
+        encrypted_vector = np.dot(key_matrix, vector) % 26
+        ciphertext += ''.join([num_to_char(num[0]) for num in encrypted_vector])
+    return ciphertext
+
+# Decrypt function
+def hill_decrypt(ciphertext, key_matrix):
+    inverse_matrix = matrix_inverse_mod_26(key_matrix)
+    plaintext = ""
+    for i in range(0, len(ciphertext), 2):
+        block = [char_to_num(ciphertext[i]), char_to_num(ciphertext[i+1])]
+        vector = np.array(block).reshape(2, 1)
+        decrypted_vector = np.dot(inverse_matrix, vector) % 26
+        plaintext += ''.join([num_to_char(num[0]) for num in decrypted_vector])
+    return plaintext
+
+# Example usage
+if __name__ == "__main__":
+    # Define a 2x2 key matrix (must be invertible mod 26)
+    key = np.array([[3, 3],
+                    [2, 5]])
+
+    plaintext = "help"
+    print("Original:", plaintext)
+
+    encrypted = hill_encrypt(plaintext, key)
+    print("Encrypted:", encrypted)
+
+    decrypted = hill_decrypt(encrypted, key)
+    print("Decrypted:", decrypted)
+
