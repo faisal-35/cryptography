@@ -1,0 +1,63 @@
+import numpy as np
+
+# 3x3 ম্যাট্রিক্স তৈরি: Key, Message, Cipher
+key_matrix = np.zeros((3, 3), dtype=int)
+message_vector = np.zeros((3, 1), dtype=int)
+cipher_matrix = np.zeros((3, 1), dtype=int)
+
+# 🔑 Key Matrix তৈরি
+def get_key_matrix(key):
+    k = 0
+    for i in range(3):
+        for j in range(3):
+            key_matrix[i][j] = ord(key[k]) % 65  # 'A' = 0, 'B' = 1 ...
+            k += 1
+
+# 🔒 Encrypt ফাংশন
+def encrypt(message_vector):
+    for i in range(3):
+        cipher_matrix[i][0] = 0
+        for x in range(3):
+            cipher_matrix[i][0] += key_matrix[i][x] * message_vector[x][0]
+        cipher_matrix[i][0] %= 26
+
+# 🔓 ডিক্রিপ্ট করার জন্য ইনভার্স ম্যাট্রিক্স বের করা
+def mod_inverse(a, m):
+    # a^-1 mod m
+    for x in range(1, m):
+        if (a * x) % m == 1:
+            return x
+    return None
+
+def matrix_mod_inv(matrix, modulus):
+    det = int(np.round(np.linalg.det(matrix)))  # determinant
+    det = det % modulus
+    det_inv = mod_inverse(det, modulus)  # modular inverse of determinant
+    if det_inv is None:
+        raise ValueError("Key matrix is not invertible under mod", modulus)
+    # Cofactor matrix
+    adjugate = np.round(det * np.linalg.inv(matrix)).astype(int) % modulus
+    return (det_inv * adjugate) % modulus
+
+# 🔓 ডিক্রিপশন ফাংশন
+def decrypt(cipher_matrix):
+    inv_key = matrix_mod_inv(key_matrix, 26)
+    decrypted = np.dot(inv_key, cipher_matrix) % 26
+    plaintext = ''.join([chr(int(val) + 65) for val in decrypted])
+    print("Decrypted Text:", plaintext)
+
+# মূল ফাংশন
+def hill_cipher(message, key):
+    get_key_matrix(key)
+    # message_vector বানানো
+    for i in range(3):
+        message_vector[i][0] = ord(message[i]) % 65
+    encrypt(message_vector)
+    ciphertext = ''.join([chr(cipher_matrix[i][0] + 65) for i in range(3)])
+    print("Ciphertext:", ciphertext)
+    decrypt(cipher_matrix)  # ডিক্রিপশন কল
+
+# ✅ Example
+message = "DOG"       # 3 letter message
+key = "YHGINUKER"     # 3x3 = 9 letter key
+hill_cipher(message, key)
